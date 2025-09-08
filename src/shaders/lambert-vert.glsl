@@ -34,13 +34,92 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+mat3 rotateAboutX(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat3(
+        1.0, 0.0, 0.0,
+        0.0,    c,   -s,
+        0.0,    s,    c
+    );
+}
+
+mat3 rotateAboutY(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat3(
+         c, 0.0,    s,
+        0.0, 1.0, 0.0,
+        -s, 0.0,    c
+    );
+}
+
+mat3 rotateAboutZ(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat3(
+         c,   -s, 0.0,
+         s,    c, 0.0,
+        0.0, 0.0, 1.0
+    );
+}
+
+
+vec3 random3(vec3 p) {
+    return fract(sin(vec3(
+        dot(p, vec3(127.1, 311.7, 74.7)),
+        dot(p, vec3(269.5, 183.3, 246.1)),
+        dot(p, vec3(113.5, 271.9, 124.6))
+    )) * 43758.5453);
+}
+
+float voronoi3D(vec3 xyz, int gridSize) {
+    vec3 stw = xyz * float(gridSize);
+
+    vec3 i = floor(stw);
+    vec3 f = fract(stw);
+
+
+    float minDist = 100.;
+    for (int x = -1; x <=1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            for (int z = -1; z <= 1; z++) {
+                vec3 offset = vec3(float(x), float(y),float(z));
+                vec3 randomPt = random3(i + offset);
+                float currDist = length(f - (randomPt + offset));
+            
+               minDist = min(minDist, currDist);
+            }
+        }
+    }
+    return minDist;
+}
+
+
 void main()
 {
     vec4 localPos = vs_Pos;
-    localPos.xyz *= sin(u_Time) + 1.5;
+    
+
+    vec3 dir = normalize(vs_Pos.xyz);
+    // localPos.x += sin(u_Time + vs_Pos.y * 5.0 + sin(u_Time)) * cos(u_Time);
+    
+    // localPos.xyz *= sin(u_Time) * 0.5 + 0.5;
+    // float scale = voronoi3D(vec3(vs_Pos.xy, u_Time), 2);
+    float explode = cos(u_Time * 0.5) * 0.5 + 0.5; // 0 - 1
+    
+
+    vec3 displaced = localPos.xyz + dir * explode * 2.0;
+
+    if (dir.x * dir.y * dir.z > 0.) {
+        localPos = vec4(displaced, 1.0);
+    } 
+    
+    localPos.xyz = rotateAboutX(u_Time * 0.5) * rotateAboutZ(0.5 * u_Time) * localPos.xyz;
+    localPos.xyz *= cos(u_Time * 1.) * 0.5 + 0.5 + 0.1;
 
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
-    fs_Pos = vs_Pos;
+    fs_Pos = localPos;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.

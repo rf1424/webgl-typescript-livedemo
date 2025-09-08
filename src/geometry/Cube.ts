@@ -84,12 +84,29 @@ class Cube extends Drawable {
 
         this.indices = new Uint32Array(36);
         for (let i = 0; i < 6; i++) {
-            this.indices[i * 6 + 0] = i * 4 + 0;
-            this.indices[i * 6 + 1] = i * 4 + 1;
-            this.indices[i * 6 + 2] = i * 4 + 2;
-            this.indices[i * 6 + 3] = i * 4 + 0;
-            this.indices[i * 6 + 4] = i * 4 + 2;
-            this.indices[i * 6 + 5] = i * 4 + 3;
+
+            // two triangles per face, 
+            //change index order(triangle orientation) for deformation in vert shader
+            if (i == 0 || i == 3 || i == 5) {
+                // front-0, left-3. bottom-5 
+                this.indices[i * 6 + 0] = i * 4 + 0;
+                this.indices[i * 6 + 1] = i * 4 + 1;
+                this.indices[i * 6 + 2] = i * 4 + 3;
+                this.indices[i * 6 + 3] = i * 4 + 1;
+                this.indices[i * 6 + 4] = i * 4 + 2;
+                this.indices[i * 6 + 5] = i * 4 + 3;
+            }
+            else {
+                // back-1, right-2, top-4
+                this.indices[i * 6 + 0] = i * 4 + 0;
+                this.indices[i * 6 + 1] = i * 4 + 1;
+                this.indices[i * 6 + 2] = i * 4 + 2;
+                this.indices[i * 6 + 3] = i * 4 + 0;
+                this.indices[i * 6 + 4] = i * 4 + 2;
+                this.indices[i * 6 + 5] = i * 4 + 3;
+
+
+            }            
         }
 
         this.generateIdx();
