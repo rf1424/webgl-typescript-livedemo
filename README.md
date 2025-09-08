@@ -1,3 +1,17 @@
+
+In the vertex shader, I deformed the cube such that 4 of its alternating vertices extend in a sinusoidal pattern over time. 
+I also rotated and scaled the cube over time.
+In the fragment shader, I sampled 3D worley noise using the cube's changing position 
+and mixed the voronoi pattern with the base color.
+
+
+[Live Demo Link](https://rf1424.github.io/webgl-typescript-livedemo/)
+
+
+![](readmeFiles/0.png)
+![](readmeFiles/1.png)
+![](readmeFiles/2.png)
+
 # HW 0: Intro to Javascript and WebGL
 
 <p align="center">
